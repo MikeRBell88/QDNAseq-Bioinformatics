@@ -1,0 +1,33 @@
+---
+title: "**QDNAseq**"
+author: "Michael Bell,  15002484" 
+date: "05/01/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Quantitative DNA Sequencing for Chromosomal Aberrations**
+# **QDNAseq R Package**
+
+## **Introduction:**  
+Chromosomal aberrations are defined as a change within either the structure or number of a chromosome. Most typical chromosomal aberrations are considered to be aneuploids; meaning they contain or are missing a number of chromosomes (e.g trisomy and monosomy) (Abhishek, K. J. a. D. S. a. K. D. a. R. M. a. A. K. P. (2018). 
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+ 
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
