@@ -1,0 +1,239 @@
+---
+title: "**QDNAseq**"
+author: "Michael Bell,  15002484"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.cap = " ")
+knitr::include_graphics("https://raw.githubusercontent.com/MikeRBell88/QDNAseq-Bioinformatics/b97c84ab34e86dbf7535f34881bfa2eb205bedd9/CNVMethodsTable.png")
+library(QDNAseq)
+library(tidyverse)
+library(png)
+```
+
+# **Quantitative DNA Sequencing for Chromosomal Aberrations**  
+
+## **Contents:**  
+### **1:** Introduction  
+### \ **1.1:** Chromosomal Aberrations  
+### \ **1.2:** WGS DNA Copy Number Estimation Methods  
+### \ **1.3:** QDNAseq Package  
+### **2:** Running QDNAseq  
+### \ **2.1:** Bin Annotations  
+### \ **2.2:** Processing BAM Files  
+### \ **2.3:** Downstream Analyses  
+### **3:** Sex Chromosome Processing  
+### **4:** Discussion  
+### **5:** References  
+
+## **1: Introduction:**
+Scheinin et al. (2014) developed the QDNAseq pipeline to help improve the detection of DNA copy number aberrations from whole-genome sequencing (WGS). The focus of the study was to improve analysis and quantification of the challenges that are presented by WGS; this includes reference genome errors, sequence completions, repeat sequences, polymorphisms, variability in sample quality and procedure bias in relation to cancerous cells and hallmark characteristics.   
+
+## **1.1: Chromosomal Aberrations:**  
+Chromosomal aberrations are defined as a change within either the structure or number of a chromosome. Most typical chromosomal aberrations are considered to be aneuploids; meaning they contain or are missing a number of chromosomes (e.g trisomy and monosomy) (Abhishek et al. (2018). Previous to WGS, Kallioniemi et al. (1992) pioneered alterations in chromosomes through detection of genome-wide comparative genomic hybridisation (CGH); this provided a platform for array-based CGH (Snijders et al. 2001); in addition to single nucleotide polymorphism (SNP) arrays (Ylstra et al. (2006).  
+
+## **1.2: WGS DNA Copy Number Estimation Methods**
+Prior to **QDNAseq**, there were four common methods to identify WGS DNA copy number variant (CNV) detection, 1. _**DOC**_ (depth of coverage), 2. _**PEM**_ (paired end mapping), 3. _**SR**_ (split reads) and 4. _**AS**_ (assembly based). Table 1 has been adapted from Teo et al. 2012 and explains what each of the four methods does. With the exception of _**AS**_. _**DOC**_, _**PEM**_ and _**SR**_ require mapping of the sequence reads to a known reference genome. Typically the methods usually compliment each other and detect certain types of variants. However, each method have unique variants that are specific to that approach. _**AS**_ based methods utilize construction of a genome in sections from reads instead of aligning them with a reference. This allows them to have a greater sensitivity when detecting deviations from the reference genomes but require much higher sequence coverage of around 40 times that of other methods, due to this the costs are higher. _**SR**_ and _**PEM**_ both map sequence reads from either end of genomic DNA molecules onto a reference genome. Both methods provide copy number and genome rearrangement data but are subject to higher sensitivity in regards to DNA integrity. Finally, _**DOC**_ methods deduce the copy number from sequence depth across the whole genome and does not require sequences from both ends (Scheinin et al. (2014).  
+
+![Table_1](https://raw.githubusercontent.com/MikeRBell88/QDNAseq-Bioinformatics/b97c84ab34e86dbf7535f34881bfa2eb205bedd9/CNVMethodsTable.png)  
+
+## **1.3: QDNAseq Package:**  
+_**QDNAseq**_ was developed to implement profile correction and blacklisting, perform downstream segmentation and calling of aberrations using already established tools. _**QDNAseq**_ utilises BAM input files as these are one of the more common file types produced by current alignment tools. _**QDNAseq**_ is available at [_**QDNAseq**_ Bioconductor](https://www.bioconductor.org/packages/release/bioc/html/QDNAseq.html) and has detailed information regarding operation and tutorial. 
+
+## **2: Running QDNAseq**
+The following code sequences are the basics of how to run the *QDNAseq* package. For the purposes of this run, the example data set used was chromosome 7-10 low grade glioma (LGG) sample; as per tutorial provided by Scheinin et al. (2014). The first step is to load the *QDNAseq* package.
+```{r}
+library(QDNAseq)
+```
+### **2.1: Bin Annotations**  
+The bin annotations are available through the *QDNAseq.hg19* package which has to be installed from Bioconductor separate to *QDNAseq*. These are pre-calculated for genome build hg19 in sizes 1, 5, 10, 15, 30, 50, 100, 500 and 1000 kbp.  
+```{r Bin Annotations, warning=FALSE, message=FALSE}
+BiocManager::install("QDNAseq.hg19")
+bins <- getBinAnnotations(binSize=15)
+bins
+```  
+
+### **2.2: Processing Bam Files**  
+Next, the sequencing data from BAM files need to be loaded. This will produce an object of class *QDNAseqReadCounts* (see below). For multiple use of same BAM files use option cache=TRUE to cache intermediate files to speed up future analysis.  
+
+### _**Obtaining Data**_  
+LGG150 test data was retrieved from [LGG150 Data File](https://github.com/ccagc/QDNAseq/blob/b77cbd78fef33c4695b990bc76298936d9fcebf4/data/LGG150.rda)
+```{r Obtaining Data}
+data(LGG150)
+readCounts <- (LGG150)
+readCounts
+```  
+
+### _**Read Count Plotting**_ 
+A raw copy number profile plot is produced highlighting the bins that will be removed (highlighted Red).  
+```{r LGG150 Read Count Plot}
+plot(readCounts, logTransform=FALSE, ylim=c(-50, 200), main="Figure 1: LGG150 Read Counts Highlighted", cex.main = 1, font.main = 4)
+highlightFilters(readCounts, logTransform=FALSE,
+                   residual=TRUE, blacklist=TRUE)
+```  
+
+### _**Median Read Count Plotting**_
+Applying filters and plotting the median read counts as a function of GC content and mappability. The distribution appears less smooth than what is expected from an entire genome due to only containing a subset of chromosomes.  
+```{r LGG150 Median Read Count Plot}
+readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)
+
+isobarPlot(readCountsFiltered, main="Figure 2: LGG150 Median Read Counts", cex.main = 1, font.main = 4)
+```  
+
+### _**Read Count Noise Plotting**_
+(Below) Estimation for correction for GC content and mappability and plotting the relationship between the observed standard deviation and read depth.
+```{r LGG150 Read Count Noise Plot}
+readCountsFiltered <- estimateCorrection(readCountsFiltered)  
+
+noisePlot(readCountsFiltered, main="Figure 3: LGG150 Read Count Relationship Between Sequence Depth and Noise", cex.main = 1, font.main = 4)
+```  
+
+### _**Copy Number Filtering**_
+Applying correction for GC content and mappability. *QDNAseqCopyNumbers* object will be produced which is then normalized, smooth outliers and plot copy number profile. 
+```{r LGG150 Copy Number Filtering and Plotting}
+copyNumbers <- correctBins(readCountsFiltered)
+
+copyNumbers
+
+copyNumbersNormalized <- normalizeBins(copyNumbers)
+
+copyNumbersSmooth <- smoothOutlierBins(copyNumbersNormalized)
+
+plot(copyNumbersSmooth, main="Figure 4: LGG150 Copy number profile after correctiions", cex.main = 1, font.main = 4)
+```  
+
+### _**Exporting Filtered Read Counts**_
+The data is ready to be analyzed with a downstream package of choice. For external visualisation the data can be exported to specific file formats (IGV analysis below).
+```{r Exporting Filtered Read Counts}
+exportBins(copyNumbersSmooth, file="LGG150.txt")
+
+exportBins(copyNumbersSmooth, file="LGG150.igv", format="igv")
+
+exportBins(copyNumbersSmooth, file="LGG150.bed", format="bed")
+```  
+
+## **2.3: Downstream Analysis**  
+
+### _**Read Count Segmenting**_
+```{r LGG150 Read Count Segmenting}
+copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun="sqrt")
+
+copyNumbersSegmented <- normalizeSegmentedBins(copyNumbersSegmented)
+```  
+
+### _**Segmented Read Count Plot**_
+Segmentation with the CBS algorithm from *DNAcopy*, and calling copy number aberrations
+with *CGHcall* or cutoffs have been implemented for convenience.
+By default, segmentation uses a log2 -transformation, but a sqrt(x + 3/8) can also be used as it stabilizes the variance of a Poisson distribution
+```{r LGG150 Segmented Read Count Plot}
+plot(copyNumbersSegmented, main="Figure 5: LGG150 Copy number profile after Segmenting", cex.main = 1, font.main = 4)
+```  
+
+### _**Called Read Count Plot**_
+Tune segmentation parameters and call aberrations, then final results can be plotted. 
+```{r LGG150 Called Read Count Plot, result=FALSE, warning=FALSE, message=FALSE}
+copyNumbersCalled <- callBins(copyNumbersSegmented)
+
+plot(copyNumbersCalled, main="Figure 6: LGG150 Copy number profile after calling gains and losses", cex.main = 1, font.main = 4)
+```  
+
+### _**Called Count Extraction to VCF and SEG Files**_
+Called data can be exported as VCF file or SEG for further downstream analysis.
+```{r LGG150 Called Count Extraction to VCF and SEG Files}
+exportBins(copyNumbersCalled, "copyNumbersCalled.vcf")
+
+exportBins(copyNumbersCalled, "copyNumbersCalled.seg")
+```  
+
+### _**CGHcall Conversion**_
+For other downstream analyses, such as running *CGHregions*, conversion to a *cghCall* object can be useful. This command can also be used to generate cghRAW and cghSeq objects by running it before segmentation or calling. 
+```{r CGHcall Conversion}
+cgh <- makeCgh(copyNumbersCalled)
+
+cgh
+```  
+
+## **2.4 Parallel Comparison**  
+
+### _**Parallel Computation**_  
+_**QDNAseq**_ can allow for parallel computing using the _**future**_ package. In order to do this and appropriate plan must be selected. _**QDNAseq**_ currently includes estimateCorrection(), segmentBins(), createBins() and calculateBlacklist() for parallel processing. It also includes binReadcounts() but this only parallelises by chromosome when chunkSize is used. The default argument method="CGHcall" can be used for parallel computation using the function callBins() or CGHcall(). However the number of processes to use needs to be specified with the argument ncpus.  
+
+### _**Non-Parallel Processing**_  
+The Default is to use single-core processing via "sequential" futures. This is set by: 
+```{r Non-Parallel Processing}
+future::plan("sequential")
+```  
+
+### _**Parallel Processing a Current Machine and Adhoc Machine**_  
+In order to process data in parallel using multiple processes on a current machine (see Below). after, all functions supporting parallel processing will automatically use it. However with no restrictions set, the default is to use all cores available. to set the number of parallel workers, use argument *workers* (example below). 
+```{r}
+future::plan("multisession")
+
+future::plan("multisession", workers=4) 
+```
+
+Connecting to an Adhoc machine using multiple R sessions the following code or similar should be used: 
+```{}
+cl <- future::makeClusterPSOCK(...)
+future::plan("cluster", cluster=cl)
+```
+
+## **3: Sex Chromosome Processing**  
+_**QDNAseq**_ automatically ignores sex chromosomes by default. in order for them to be included in the analysis, the function applyFilters() should be run with the argument chromosomes=NA (includes both X and Y) or chromsomes="Y"/chromsomes="X" to include X or Y respectively.   
+This would also affect the calculation of LOESS and should be counteracted by using the estimateCorrection() function. The process should be: Filter Sex Chromosomes, run estimateCorrection() and reverse the sex chromosome filtering.  
+
+### _**Sex Chromosome QDNAseq**_  
+```{}
+readCounts <- binReadCounts(getBinAnnotations(15))  
+readCounts <- applyFilters(readCounts)  
+readCounts <- estimateCorrection(readCounts)  
+readCounts <- applyFilters(readCounts, chromosomes=NA)  
+copyNumbers <- correctBins(readCounts)
+```
+
+## **4: Discussion**  
+It must be noted that during the running of this example data set using _**QDNAseq**_ the outputs will show differing results in comparison to larger data sets. This is due to the smaller size of data that is used (chromosome 7-10). At each step the differences between this data and larger data sets will be elaborated where needed.  
+
+The purpose of the development of _**QDNAseq**_ was to improve the yield genome profiles that had a noise level which was closer to the statistical limit imposed by read counting (Scheinin et al. (2014). In the example data set issued by Scheinin et al. (2014) in their [tutorial section]( https://www.bioconductor.org/packages/release/bioc/vignettes/QDNAseq/inst/doc/QDNAseq.pdf) on Bioconductor; it is possible to understand and visualise what the developers of the program intended to do with the package. It is also worthy to note that the _**QDNAseq**_ package was used to analyse 1000 samples, which according to Scheinin et al. (2014), state that using this method they were able to provide improved correction of artifacts introduced by low DNA quality. Also improving the copy number data in comparison with high-resolution microarrays at lower costs.  
+
+The raw copy number profile with bins to be removed by filtering highlighted (red reads) are illustrated in **Figure 1**. The bins are ordered across the x-axis by their genomic position and the y-axis depicts the median normalised log2 transformed data. On larger datasets, small triangles may appear on the top and bottom of the plot. These are data points that fall outside of the plot area. In this example there are only a couple of outliers that can be seen. However, given larger datasets the expected number of outliers would be substantially more. The expected and measured standard deviation equations is produced by the raw data plot on the top right.  
+
+**Figure 2** depicts the median read counts per bin as a function of GC content and mappability; regions of the plot that are white illustrate bins without the combination of GC and mappability. On the top right of the median read count plot it shows the total number of sequence reads (1,189,060 reads).  
+
+The dependence of variance on sequence depth plotting can be seen in **Figure 3**. The central line shows the linear expectation of the variance and low quality DNA samples will appear further above the central line and be noisier than that of good quality samples. During this example only the single sample LGG150 was used to plot noise but multiple samples can be used simultaneously (Scheinin et al. 2014).  
+
+The copy number profile for LGG150 after running corrections from the copy number filtering section of this report is shown in **Figure 4**. This plot shows the resulting corrections seen in **Figure 1** having been removed and then normalised. Scheinin et al. (2014) states that the segmentation parameters can be finely tuned to reach a satisfactory outcome. It is at this point in the process that a **.vcf** and **.seg** file can be exported to enable further downstream analysis (analysis package depends on what the user needs).  
+
+A key part of _**QDNAseq**_ is the inclusion of two primary packages. The first developed by Venkatraman et al. (2015) is the [_**DNAcopy**_](http://bioconductor.org/packages/release/bioc/html/DNAcopy.html) package which uses the conflict based search (CBS) function. The second is the [_**CGHcall**_](http://bioconductor.org/packages/release/bioc/html/CGHcall.html) package developed by Van Os et al. (2006) for calling copy number aberrations. The default segmentation uses log2-transformation. **Figure 5** shows the resulting plot after processing.  
+
+Finally in **Figure 6**, the data has been segmented, normalised and gains and losses have been called with the red highlighted segments indicating aberrations identified.  
+
+The sample data that was presented during this example did not have either the X or Y chromosome present in the bins. Therefore, processing larger data sets that do include them will need to add the extra process noted in the Sex Chromosome QDNAseq section of this report. It is evident that characteristic data still poses a problem for copy number packages but is easily rectified using this process. If it were possible, this process should be integrated within the package to eliminate this step.  
+
+_**QDNAseq**_ overall as a package to improve the profile correction and blacklisting, perform downstream segmentation and calling of aberrations; the  data suggests that Scheinin et al. (2014) were able to improve on the previous methods and provide a statistically valid argument that the package could produce read profiles that segmentation and calling steps would sensitively detect true aberrations with an acceptable amount of false negatives.  
+
+## **5: References:**  
+Abhishek, K. J. a. D. S. a. K. D. a. R. M. a. A. K. P. (2018) Chapter Four - Chromosomal Aberrations. In Ashutosh Kumar and Vasily, N. D. A. A. D. A. R. S. (editor) Mutagenicity: Assays and Applications. Academic Press. 69-92. https://www.sciencedirect.com/science/article/pii/B9780128092521000043  
+
+Hartl, D. L. a. C. B. (2019) Genetics: analysis of genes and genomes. Ninth edition. Burlington, Massachusetts: Jones & Bartlett Learning.  
+
+Kallioniemi, A. a. K. O. a. S. D. a. R. D. a. G. J. W. a. W. F. a. P. D. (1992) Comparative Genomic Hybridization for Molecular Cytogenetic Analysis of Solid Tumors. Science (American Association for the Advancement of Science) 258 (5083), 818-821.  
+
+Karlin, S. a. L. I. a. B. B. E. (1994) Heterogeneity of Genomes: Measures and Values. Proceedings of the National Academy of Sciences - PNAS 91 (26), 12837-12841.  
+
+Scheinin, I., Sie, D., Bengtsson, H., van de Wiel, M. A., Olshen, A. B., van Thuijl, H. F., van Essen, H. F., Eijk, P. P., Rustenburg, F., Meijer, G. A., Reijneveld, J. C., Wesseling, P., Pinkel, D., Albertson, D. G. and Ylstra, B. (2014) DNA copy number analysis of fresh and formalin-fixed specimens by shallow whole-genome sequencing with identification and exclusion of problematic regions in the genome assembly. Genome Res 24 (12), 2022-32.  
+
+Smolander, J., Khan, S., Singaravelu, K., Kauko, L., Lund, R. J., Laiho, A. and Elo, L. L. Evaluation of tools for identifying large copy number variations from ultra-low-coverage whole-genome sequencing data.  
+
+Snijders, A. M. a. N. N. a. S. R. a. B. S. a. B. N. a. C. J. a. H. G. a. H. A. K. a. H. B. a. K. (2001) Assembly of microarrays for genome-wide measurement of DNA copy number. Nature genetics 29 (3), 263-264.  
+
+Van der Linden, M. a. R. L. a. V. T. A. a. D. A. a. D. S. M. a. S. T. a. C. D. a. L. Y. a. M. B. a. (2019) Detection of Copy Number Alterations by Shallow Whole-Genome Sequencing of Formalin-Fixed, Paraffin-Embedded Tumor Tissue. Archives of pathology & laboratory medicine (1976) 144 (8), 974-981.  
+
+van Os, H., Andrzejewski, S., Bakker, E., Barrena, I., Bryan, G. J., Caromel, B., Ghareeb, B., Isidore, E., de Jong, W., van Koert, P., Lefebvre, V., Milbourne, D., Ritter, E., van der Voort, J. N., Rousselle-Bourgeois, F., van Vliet, J., Waugh, R., Visser, R. G., Bakker, J. and van Eck, H. J. (2006) Construction of a 10,000-marker ultradense genetic recombination map of potato: providing a framework for accelerated gene isolation and a genomewide physical map. Genetics 173 (2), 1075-87.  
+
+Venkatraman, E. S. a. A. B. O. (2015) DNAcopy: A Package for Analyzing DNA Copy Data.  
+
+Wiel, v. d. M. A. a. K. K. I. a. V. S. J. a. W. v. W. N. a. W. S. M. a. Y. B. (2007) CGHcall : calling aberrations for array CGH tumor profiles. Bioinformatics (Oxford, England) 23 (7), 892-894.  
+
+Ylstra, B. a. v. d. I. P. a. C. B. a. B. R. H. a. M. G. A. (2006) BAC to the future! or oligonucleotides: a perspective for micro array comparative genomic hybridization (array CGH). Nucleic acids research 34 (2), 445-450.  
