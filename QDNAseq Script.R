@@ -15,12 +15,16 @@ bins <- getBinAnnotations(binSize=15)
 bins
 install.packages("R.cache")
 
+<<<<<<< HEAD
 
 ### Processing BAM files
 
 # sample data for purpose of study 
 
 LGG150 <- read.csv("https://github.com/MikeRBell88/QDNAseq-Bioinformatics/raw/main/LGG150.rda", row.names=NULL)
+=======
+data(LGG150) # sample data for purpose of study 
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
 
 readCounts <- (LGG150)
 
@@ -55,6 +59,7 @@ exportBins(copyNumbersSmooth, file="LGG150.igv", format="igv")
 
 exportBins(copyNumbersSmooth, file="LGG150.bed", format="bed")
 
+<<<<<<< HEAD
 ### Downstream Analyses
 
 copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun="sqrt")
@@ -77,3 +82,5 @@ cgh
 
 ### Parallel Computation
 copyNumbers <- callBins(..., ncpus=4)
+=======
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399

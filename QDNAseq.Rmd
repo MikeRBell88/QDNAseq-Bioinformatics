@@ -7,8 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+<<<<<<< HEAD
 library(QDNAseq)
 library(tidyverse)
+=======
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
 ```
 
 # **Quantitative DNA Sequencing for Chromosomal Aberrations**
@@ -23,9 +26,13 @@ library(tidyverse)
 **2:** Running QDNAseq  
 \ **2.1:** Bin Annotations  
 \ **2.2:** Processing BAM Files  
+<<<<<<< HEAD
 \ **2.3:** Downstream Analyses
 **3:** Sex Chromosome Processing
 \
+=======
+\ **2.3:** Downstream Analyses  
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
 
 ## **1: Introduction:**
 Scheinin et al. (2014) developed the QDNAseq pipeline to help improve the detection of DNA copy number aberrations from whole-genome sequencing (WGS). The focus of the study was to improve analysis and quantification of the challenges that are presented by WGS; this includes reference genome errors, sequence completions, repeat sequences, polymorphisms, variability in sample quality and procedure bias.  
@@ -41,6 +48,7 @@ Chromosomal aberrations are defined as a change within either the structure or n
 
 ## **2: Running QDNAseq**
 
+<<<<<<< HEAD
 ### **2.1: Bin Annotations**  
 ```{r Bin Annotations}
 bins <- getBinAnnotations(binSize=15)
@@ -165,3 +173,39 @@ readCounts <- applyFilters(readCounts, chromosomes=NA)
 copyNumbers <- correctBins(readCounts)
 ```
 
+=======
+## **2.1: Bin Annotations**
+```{r bin annotations}
+data(LGG150) # sample data for purpose of study 
+
+readCounts <- (LGG150)
+
+readCounts
+
+plot(readCounts, logTransform=FALSE, ylim=c(-50, 200))
+
+readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)
+
+isobarPlot(readCountsFiltered)
+```
+## **2.2: ** 
+
+## **2.3: **
+
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+ 
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
