@@ -28,13 +28,24 @@ install.packages("readPNG")
 devtools::install_github("lbusett/insert_table")
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 
 ### Processing BAM files
 
 # sample data for purpose of study 
 
 LGG150 <- read.csv("https://github.com/MikeRBell88/QDNAseq-Bioinformatics/raw/main/LGG150.rda", row.names=NULL)
+<<<<<<< HEAD
 data(LGG150) # sample data for purpose of study 
+=======
+=======
+data(LGG150) # sample data for purpose of study 
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
+
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 readCounts <- (LGG150)
 
 readCounts
@@ -68,7 +79,11 @@ exportBins(copyNumbersSmooth, file="LGG150.igv", format="igv")
 
 exportBins(copyNumbersSmooth, file="LGG150.bed", format="bed")
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 ### Downstream Analyses
 
 copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun="sqrt")
@@ -93,5 +108,8 @@ cgh
 copyNumbers <- callBins(..., ncpus=4)
 =======
 >>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
+<<<<<<< HEAD
 
 ! [Alt text]("/Users/Mike's PC/Pictures/CNVMethodsTable.png")
+=======
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef

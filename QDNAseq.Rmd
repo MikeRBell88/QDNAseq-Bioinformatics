@@ -6,11 +6,20 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+<<<<<<< HEAD
 knitr::opts_chunk$set(echo = TRUE, fig.cap = " ")
 knitr::include_graphics("https://raw.githubusercontent.com/MikeRBell88/QDNAseq-Bioinformatics/b97c84ab34e86dbf7535f34881bfa2eb205bedd9/CNVMethodsTable.png")
 library(QDNAseq)
 library(tidyverse)
 library(png)
+=======
+knitr::opts_chunk$set(echo = TRUE)
+<<<<<<< HEAD
+library(QDNAseq)
+library(tidyverse)
+=======
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 ```
 
 # **Quantitative DNA Sequencing for Chromosomal Aberrations**
@@ -24,9 +33,19 @@ library(png)
 **2:** Running QDNAseq  
 \ **2.1:** Bin Annotations  
 \ **2.2:** Processing BAM Files  
+<<<<<<< HEAD
 \ **2.3:** Downstream Analyses  
 **3:** Sex Chromosome Processing  
 **4:** Discussion
+=======
+<<<<<<< HEAD
+\ **2.3:** Downstream Analyses
+**3:** Sex Chromosome Processing
+\
+=======
+\ **2.3:** Downstream Analyses  
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 
 ## **1: Introduction:**
 Scheinin et al. (2014) developed the QDNAseq pipeline to help improve the detection of DNA copy number aberrations from whole-genome sequencing (WGS). The focus of the study was to improve analysis and quantification of the challenges that are presented by WGS; this includes reference genome errors, sequence completions, repeat sequences, polymorphisms, variability in sample quality and procedure bias in relation to cancerous cells and hallmark characteristics.   
@@ -41,10 +60,15 @@ Prior to **QDNAseq**, there was four common methods to identify WGS DNA copy num
 _**QDNAseq**_ was developed to implement profile correction and blacklisting, perform downstream seqmentation and calling of abberations using already established tools. _**QDNAseq**_ utilises BAM input files as these are one of the more common file types produced by current alignment tools. _**QDNAseq**_ is available at [_**QDNAseq**_ Bioconductor](https://www.bioconductor.org/packages/release/bioc/html/QDNAseq.html) and has detailed information regarding operation and tutorial. 
 
 ## **2: Running QDNAseq**
+<<<<<<< HEAD
 The following code sequences are the basics of how to run the *QDNAseq* package. For the purposes of this run, the example data set used was chromosome 7-10 low grade glioma (LGG) sample; as per tutorial provided by Scheinin et al. (2014). The first step is to load the *QDNAseq* package.
 ```{r}
 library(QDNAseq)
 ```
+=======
+
+<<<<<<< HEAD
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
 ### **2.1: Bin Annotations**  
 The bin annotations are available through the *QDNAseq.hg19* package which has to be installed from Bioconductor separate to *QDNAseq*. These are pre-calculated for genome build hg19 in sizes 1, 5, 10, 15, 30, 50, 100, 500 and 1000 kbp.  
 ```{r Bin Annotations, warning=FALSE, message=FALSE}
@@ -193,4 +217,43 @@ readCounts <- applyFilters(readCounts, chromosomes=NA)
 copyNumbers <- correctBins(readCounts)
 ```
 
+<<<<<<< HEAD
 ## **4: Discussion**
+=======
+=======
+## **2.1: Bin Annotations**
+```{r bin annotations}
+data(LGG150) # sample data for purpose of study 
+
+readCounts <- (LGG150)
+
+readCounts
+
+plot(readCounts, logTransform=FALSE, ylim=c(-50, 200))
+
+readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)
+
+isobarPlot(readCountsFiltered)
+```
+## **2.2: ** 
+
+## **2.3: **
+
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+ 
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+>>>>>>> dd92cfcabd4a8a27d3f4fbd5c507ecc7a45d9399
+>>>>>>> 8279a97a05a5e63488795fc5a0e5dc2114b6a6ef
